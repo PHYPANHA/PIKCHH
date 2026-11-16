@@ -4,7 +4,7 @@ A Spring Boot microservice for managing an institute directory. It exposes a ver
 
 ## Requirements
 
-- Java 17+
+- Java 25+
 - Maven 3.9+
 - Docker with Docker Compose (for the containerized setup)
 
@@ -41,6 +41,28 @@ docker compose down
 ```
 
 The management dashboard is available at `http://localhost:8080/`. The API is available at `http://localhost:8080/api/v1/institutes`; health is available at `http://localhost:8080/actuator/health`. PostgreSQL is exposed on port `5432`; its data remains in the `institute-data` volume after stopping the containers.
+
+## Deploy to Kubernetes
+
+The [k8s.yaml](./k8s.yaml) manifest deploys the institute service and PostgreSQL, including a persistent volume claim for database data. The cluster must have a default StorageClass for the claim to be provisioned.
+
+Build the service image and make sure it is available to your Kubernetes cluster. For a local cluster, use the image-loading workflow supported by that cluster; for a remote cluster, push the image to a registry and update the image in `k8s.yaml`.
+
+Create the database password Secret before applying the manifest:
+
+```powershell
+kubectl create secret generic institute-db-secret --from-literal=DB_PASSWORD="choose-a-strong-password"
+kubectl apply -f k8s.yaml
+```
+
+Check deployment status and open the dashboard locally:
+
+```powershell
+kubectl get deployments,pods,services
+kubectl port-forward service/institute-service 8080:8080
+```
+
+The dashboard is available at `http://localhost:8080/`. The Secret is managed separately so a database password does not need to be stored in the manifest.
 
 ## Run locally
 
@@ -83,6 +105,35 @@ Example:
   "address": "1 University Way"
 }
 ```
+
+## Academic management
+
+The dashboard includes configurable course levels for each institute, courses, course sections, and students. Open **Classes & scores** to enroll students in a section, add named assessments, and enter or update a student's score. Scores must be between zero and the assessment's maximum, and only students enrolled in that class can receive a score. The class roster calculates each student's graded points, possible points, and percentage.
+
+Academic endpoints:
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET`, `POST` | `/api/v1/course-levels` | List or add institute-specific course levels |
+| `GET`, `POST` | `/api/v1/courses` | List or add courses with a course level |
+| `GET`, `POST` | `/api/v1/classes` | List or add course sections for an academic year |
+| `GET`, `POST` | `/api/v1/students` | List or add institute students |
+| `GET`, `POST` | `/api/v1/classes/{classId}/students` | View or enroll students in a class |
+| `GET`, `POST` | `/api/v1/classes/{classId}/assessments` | View or add class assessments |
+| `GET` | `/api/v1/classes/{classId}/scores` | View scores for the class roster |
+| `PUT` | `/api/v1/assessments/{assessmentId}/scores` | Add or update a student's assessment score |
+
+Course levels, courses, students, and enrollments are scoped to their institute. Student numbers and level codes are unique within an institute.
+
+## Library management
+
+The library catalog is institute-specific and shares the academic student directory. Add books with their total physical copy count, then check them out to students with a due date. Available-copy counts are calculated from active loans, and a loan cannot be created if no copy is available. Return a book from the **Library loans** view.
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET`, `POST` | `/api/v1/library/books` | List available book inventory or add a title |
+| `GET`, `POST` | `/api/v1/library/loans` | View circulation history or check out a book |
+| `POST` | `/api/v1/library/loans/{loanId}/return` | Record a book return |
 
 ## Tests
 

@@ -26,6 +26,16 @@ public class ApiExceptionHandler {
         return problem(HttpStatus.CONFLICT, "Institute conflict", exception.getMessage());
     }
 
+    @ExceptionHandler(DomainNotFoundException.class)
+    public ProblemDetail handleDomainNotFound(DomainNotFoundException exception) {
+        return problem(HttpStatus.NOT_FOUND, "Resource not found", exception.getMessage());
+    }
+
+    @ExceptionHandler(DomainConflictException.class)
+    public ProblemDetail handleDomainConflict(DomainConflictException exception) {
+        return problem(HttpStatus.CONFLICT, "Resource conflict", exception.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidation(MethodArgumentNotValidException exception) {
         ProblemDetail detail = problem(HttpStatus.BAD_REQUEST, "Validation failed", "One or more fields are invalid");

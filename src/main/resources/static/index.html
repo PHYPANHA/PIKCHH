@@ -30,7 +30,7 @@
     .brand-mark { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 12px; color: #fff; background: linear-gradient(145deg, #8274ee, #5c4bc7); }
     .brand-mark svg { width: 20px; height: 20px; }
     .nav-label { margin: 40px 10px 12px; color: #9aa1b1; font-size: 10px; font-weight: 750; letter-spacing: 1.1px; }
-    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 9px; color: #646d81; font-size: 13px; font-weight: 600; }
+    .nav-item { display: flex; width: 100%; align-items: center; gap: 12px; padding: 11px 12px; border: 0; border-radius: 9px; color: #646d81; background: transparent; text-align: left; font-size: 13px; font-weight: 600; }
     .nav-item.active { color: var(--purple-dark); background: #f0efff; }
     .nav-item svg { width: 17px; height: 17px; }
     .sidebar-note { margin-top: auto; padding: 15px; border: 1px solid #eeedf9; border-radius: 12px; background: #faf9ff; }
@@ -70,7 +70,7 @@
     .search { position: relative; width: min(260px, 45%); }
     .search svg { position: absolute; top: 11px; left: 11px; width: 15px; height: 15px; color: #9199a9; pointer-events: none; }
     .search input { width: 100%; height: 37px; padding: 0 12px 0 34px; outline: none; border: 1px solid var(--line); border-radius: 8px; color: #30394d; background: #fff; font-size: 11px; }
-    .search input:focus, .form-field input:focus, .form-field textarea:focus { border-color: #9b91e9; box-shadow: 0 0 0 3px #6758d61a; }
+    .search input:focus, .form-field input:focus, .form-field textarea:focus, .form-field select:focus { border-color: #9b91e9; box-shadow: 0 0 0 3px #6758d61a; }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; text-align: left; }
     thead { background: #fafbfc; }
@@ -104,7 +104,7 @@
     .form-field.full { grid-column: 1 / -1; }
     .form-field label { color: #555e72; font-size: 10px; font-weight: 650; }
     .form-field label span { color: #d15460; }
-    .form-field input, .form-field textarea { width: 100%; min-height: 38px; padding: 9px 10px; outline: none; border: 1px solid var(--line); border-radius: 8px; color: #30394d; background: #fff; font-size: 11px; }
+    .form-field input, .form-field textarea, .form-field select { width: 100%; min-height: 38px; padding: 9px 10px; outline: none; border: 1px solid var(--line); border-radius: 8px; color: #30394d; background: #fff; font-size: 11px; }
     .form-field textarea { min-height: 66px; resize: vertical; }
     .modal-footer { display: flex; justify-content: flex-end; gap: 9px; margin-top: 20px; }
     .secondary-button { min-height: 38px; padding: 0 14px; border: 1px solid var(--line); border-radius: 8px; color: #596276; background: #fff; font-size: 11px; font-weight: 650; }
@@ -119,8 +119,10 @@
     }
     @media (max-width: 680px) {
       .app { display: block; }
-      .sidebar { height: 62px; flex-direction: row; align-items: center; justify-content: space-between; padding: 10px 18px; border-right: 0; border-bottom: 1px solid var(--line); }
-      .nav-label, .nav-item, .sidebar-note { display: none; }
+      .sidebar { height: auto; min-height: 62px; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 4px; padding: 10px 12px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .brand { margin-right: 10px; }
+      .nav-label, .sidebar-note { display: none; }
+      .nav-item { display: flex; width: auto; flex: 0 0 auto; padding: 8px; font-size: 10px; }
       .main { padding: 0 16px 30px; }
       .topbar { min-height: 58px; }
       .content { margin-top: 25px; }
@@ -146,10 +148,16 @@
         <span>Campus<span style="color:#6758d6">Desk</span></span>
       </div>
       <div class="nav-label">WORKSPACE</div>
-      <div class="nav-item active" aria-current="page">
+      <button class="nav-item active" type="button" data-view="institutes" aria-current="page">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5V20H3z"/><path d="M9 20v-6h6v6"/></svg>
         Institutes
-      </div>
+      </button>
+      <button class="nav-item" type="button" data-view="courseLevels">Course levels</button>
+      <button class="nav-item" type="button" data-view="courses">Courses</button>
+      <button class="nav-item" type="button" data-view="classes">Classes &amp; scores</button>
+      <button class="nav-item" type="button" data-view="students">Students</button>
+      <button class="nav-item" type="button" data-view="books">Library catalog</button>
+      <button class="nav-item" type="button" data-view="loans">Library loans</button>
       <div class="sidebar-note">
         <strong>Institute directory</strong>
         <p>Manage your institution records from one simple workspace.</p>
@@ -164,7 +172,7 @@
         </div>
       </header>
 
-      <section class="content" aria-labelledby="page-title">
+      <section class="content" id="institutes-content" aria-labelledby="page-title">
         <div class="page-heading">
           <div>
             <p class="eyebrow">Management workspace</p>
@@ -215,6 +223,40 @@
           </div>
           <div class="table-footer"><span id="results-count">Loading...</span><span>Sorted by name</span></div>
         </section>
+        <section class="content" id="management-content" aria-labelledby="management-title" hidden>
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Academic workspace</p>
+              <h1 id="management-title"></h1>
+              <p class="subtitle" id="management-subtitle"></p>
+            </div>
+            <button class="primary-button" id="management-add" type="button">Add new</button>
+          </div>
+          <div class="stats" aria-label="Workspace summary">
+            <article class="stat-card"><span class="stat-icon" aria-hidden="true">#</span><div><div class="stat-label" id="management-stat-label">Total records</div><div class="stat-value" id="management-stat-total">—</div></div></article>
+            <article class="stat-card"><span class="stat-icon" aria-hidden="true">✓</span><div><div class="stat-label" id="management-stat-detail-label">Available</div><div class="stat-value" id="management-stat-detail">—</div></div></article>
+            <article class="stat-card"><span class="stat-icon" aria-hidden="true">↗</span><div><div class="stat-label">Workspace</div><div class="stat-value" id="management-stat-name">—</div></div></article>
+          </div>
+          <section class="directory" aria-labelledby="management-table-title">
+            <div class="directory-heading">
+              <div><h2 id="management-table-title"></h2><p id="management-table-description"></p></div>
+              <label class="search" id="management-search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg>
+                <input id="management-search" type="search" placeholder="Search..." aria-label="Search records">
+              </label>
+            </div>
+            <div class="table-wrap"><table><thead id="management-head"></thead><tbody id="management-rows"></tbody></table></div>
+            <div class="table-footer"><span id="management-count"></span><span id="management-footer"></span></div>
+          </section>
+          <section class="directory" id="class-details" aria-labelledby="class-detail-title" hidden style="margin-top:20px">
+            <div class="directory-heading"><div><h2 id="class-detail-title">Class roster and scores</h2><p id="class-detail-subtitle"></p></div></div>
+            <div class="form-grid" style="padding:0 20px 20px">
+              <form id="enroll-form" class="form-field"><label for="enroll-student">Enroll existing student</label><div style="display:flex;gap:8px"><select id="enroll-student" required></select><button class="secondary-button" type="submit">Enroll</button></div></form>
+              <form id="assessment-form" class="form-field"><label for="assessment-name">Add assessment</label><div style="display:flex;gap:8px"><input id="assessment-name" placeholder="Assessment name" required maxlength="150"><input id="assessment-max" type="number" min="0.01" step="0.01" placeholder="Max score" required style="max-width:120px"><button class="secondary-button" type="submit">Add</button></div></form>
+            </div>
+            <div class="table-wrap"><table><thead id="class-score-head"></thead><tbody id="class-score-rows"></tbody></table></div>
+          </section>
+        </section>
       </section>
     </main>
   </div>
@@ -261,6 +303,12 @@
     </section>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <div class="modal-backdrop" id="management-modal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="management-modal-title">
+      <div class="modal-heading"><div><h2 id="management-modal-title"></h2><p id="management-modal-description"></p></div><button class="close-button" id="management-modal-close" type="button" aria-label="Close dialog">&times;</button></div>
+      <form id="management-form"><div class="form-grid" id="management-form-fields"></div><p class="form-error" id="management-form-error" role="alert" hidden></p><div class="modal-footer"><button class="secondary-button" id="management-modal-cancel" type="button">Cancel</button><button class="primary-button" id="management-save" type="submit">Save</button></div></form>
+    </section>
+  </div>
 
   <script>
     (() => {
@@ -511,5 +559,6 @@
       loadInstitutes();
     })();
   </script>
+  <script src="/management.js"></script>
 </body>
 </html>
