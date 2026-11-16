@@ -8,14 +8,39 @@ A Spring Boot microservice for managing an institute directory. It exposes a ver
 - Maven 3.9+
 - Docker with Docker Compose (for the containerized setup)
 
+## Build the Docker image
+
+From the repository root, build the service image with:
+
+```powershell
+docker build -t institute-management-service:latest .
+```
+
 ## Run with Docker Compose
+
+The [compose.yaml](./compose.yaml) file starts the Spring Boot institute service and PostgreSQL. It builds the service image, waits for PostgreSQL to become healthy, and keeps database data in a named Docker volume.
+
+Set a database password, then build and start both containers from the repository root:
 
 ```powershell
 $env:DB_PASSWORD = "choose-a-local-password"
-docker compose up --build
+docker compose up --build --detach
 ```
 
-The management dashboard is available at `http://localhost:8080/`. The API is available at `http://localhost:8080/api/v1/institutes`; health is available at `http://localhost:8080/actuator/health`.
+Check container status and follow the service logs:
+
+```powershell
+docker compose ps
+docker compose logs -f institute-service
+```
+
+Stop the containers when finished:
+
+```powershell
+docker compose down
+```
+
+The management dashboard is available at `http://localhost:8080/`. The API is available at `http://localhost:8080/api/v1/institutes`; health is available at `http://localhost:8080/actuator/health`. PostgreSQL is exposed on port `5432`; its data remains in the `institute-data` volume after stopping the containers.
 
 ## Run locally
 
